@@ -10,31 +10,40 @@ const nomesOriginais = [
 
 let grupoAtual = "";
 let alternativaSelecionada = null;
-let timerQuiz = null; // Variável para controlar a contagem regressiva
+let timerQuiz = null; 
 const ordemEquipes = ["Elfos", "Hobbits", "Anões", "Orcs"];
 
+// Variável para manter a ordem das alternativas na rodada atual
+let alternativasAtuaisEmbaralhadas = [];
+
+// O estado foi atualizado para suportar a nova dinâmica de rodadas globais
 let estado = JSON.parse(localStorage.getItem("vicenteFesta")) || {
     disponiveis: [...nomesOriginais],
     grupos: { Elfos: [], Hobbits: [], "Anões": [], Orcs: [] },
     quizIniciado: false,
-    perguntasDistribuidas: null,
-    turnoGeral: 0, 
+    perguntasDoJogo: [],
+    rodadaAtual: 0,
+    equipeRespondendoIndex: 0,
+    respostasRodada: {}, // Guarda as respostas das 4 equipes antes de revelar
     pontosQuiz: { Elfos: 0, Hobbits: 0, "Anões": 0, Orcs: 0 }
 };
 
 const bancoPerguntas = [
-    { titulo:"🏥 A Chegada", texto:"Quantas vezes mamãe e papai foram ao hospital no dia do nascimento?", alternativas:["3 vezes","2 vezes","1 vez"], correta:0 },
-    { titulo:"🛋️ O Salto de Mordor", texto:"Com quantos meses Vicente se jogou do sofá?", alternativas:["8 meses","6 meses","4 meses"], correta:0 },
-    { titulo:"🍈 Fruta do Condado", texto:"Qual é a fruta predileta de Vicente?", alternativas:["Pitaya","Manga","Banana"], correta:0 },
-    { titulo:"🙏 Ritual do Banquete", texto:"O que ele sempre faz antes de uma refeição?", alternativas:["Mãozinhas de oração","Bate palmas","Joga comida no chão"], correta:0 },
-    { titulo:"🌅 Despertar do Rei", texto:"O que Vicente faz assim que acorda?", alternativas:["Fica sentado","Põe as mãos no rosto","Grita pela mamãe"], correta:0 },
-    { titulo:"🐵 Tesouro da Floresta", texto:"Qual é o brinquedo preferido?", alternativas:["Macaquinho da vovó","Pokémon","Dinossauro"], correta:0 },
-    { titulo:"🏍️ Terras Livres", texto:"O que ele ama apontar na motoca?", alternativas:["Placas de trânsito","Pessoas","Os dois"], correta:0 },
-    { titulo:"⚔️ Batalha dos 3 Meses", texto:"Com 3 meses Vicente passou por cirurgia. Do que era?", alternativas:["Hérnia inguinal","Fimose","Hérnia umbilical"], correta:0 },
-    { titulo:"🥚 Feitiço de Popó", texto:"Qual alimento causou reação alérgica?", alternativas:["Ovo","Leite","Morango"], correta:0 },
-    { titulo:"🪢 Laço do Destino", texto:"Quantas voltas do cordão no pescoço?", alternativas:["1 volta","2 voltas","3 voltas"], correta:2 },
-    { titulo:"🏖️ Férias no Condado", texto:"Na praia, do que mais gostou?", alternativas:["Brincar na areia","Brincar no mar","Dormir"], correta:0 },
-    { titulo:"🛡️ Batalha da Pele", texto:"Com menos de 1 mês, o que ele teve?", alternativas:["Dermatite atópica","Brotoeja","Icterícia"], correta:0 }
+    { titulo:"🏥 A Chegada", texto:"Quantas vezes a mamãe e o papai foram ao hospital na ocasião do nascimento?", alternativas:["3 vezes","2 vezes","1 vez"], correta:0 },
+    { titulo:"🛋️ O Salto de Mordor", texto:"Com quantos meses o Vicente se jogou do sofá?", alternativas:["8 meses","6 meses","4 meses"], correta:0 },
+    { titulo:"🍈 A Fruta do Condado", texto:"Qual é a fruta predileta de Vicente?", alternativas:["Pitaya","Manga","Banana"], correta:0 },
+    { titulo:"🍖 O Ritual do Banquete", texto:"O que ele sempre faz antes de uma refeição?", alternativas:["Mãozinhas de oração","Bate palmas","Joga comida no chão"], correta:0 },
+    { titulo:"🌅 O Despertar do Rei", texto:"O que Vicente faz assim que acorda?", alternativas:["Fica sentado","Põe as mãos no rosto","Grita pela mamãe"], correta:0 },
+    { titulo:"🧸 O Tesouro de Mithril", texto:"Qual é o brinquedo preferido do Vicente?", alternativas:["Macaquinho de pelúcia","Pokémon de plástico","Dinossauro de pelúcia"], correta:0 },
+    { titulo:"🏍️ Explorando as Terras Livres", texto:"O que ele ama apontar quando sai pra passear de motoca?", alternativas:["Placas de trânsito","Pessoas","Animais"], correta:0 },
+    { titulo:"⚔️ A Batalha dos 3 Meses", texto:"Com 3 meses o Vicente passou por uma cirurgia. Devido a que?", alternativas:["Hérnia inguinal","Fimose","Hérnia umbilical"], correta:0 },
+    { titulo:"🍴 O Manjar Proibido", texto:"Qual alimento lhe causou reação alérgica?", alternativas:["Ovo","Leite","Morango"], correta:0 },
+    { titulo:"🪢 Laços do Destino", texto:"Com quantas voltas do cordão umbilical no pescoço o Vicente nasceu?", alternativas:["1 volta","2 voltas","3 voltas"], correta:2 },
+    { titulo:"🏖️ Férias em Valinor", texto:"Ao visitar a praia, do que o Vicente mais gostou?", alternativas:["Brincar na areia","Brincar no mar","Dormir"], correta:0 },
+    { titulo:"👁️ A Provação de Sauron", texto:"Com menos de 1 mês, o que ele teve na pele?", alternativas:["Dermatite atópica","Brotoeja","Icterícia"], correta:0 },
+    { titulo:"🏖️ O Ingrediente Secreto", texto:"Após enfiar uma mão bem cheia de areia da praia na boca, o Vicente começou a demonstrar uma nova habilidade. Qual?", alternativas:["Engatinhar","Mandar beijo","Falar"], correta:0 },
+    { titulo:"🎺 Anúncio Real", texto:"Com quantos meses o Vicente foi apresentado na Igreja?", alternativas:["3 meses","4 meses","2 meses"], correta:0 },
+    { titulo:"🗣️ Aprendendo a Língua da Terra Média", texto:"Qual foi a primeira palavra que o Vicente aprendeu a falar?", alternativas:["Água","Papai","Abre"], correta:0 }
 ];
 
 function salvar(){
@@ -52,13 +61,9 @@ function mostrar(id){
 }
 
 function escolherGrupo(grupo){
-    // NOVA LÓGICA DE BALANCEAMENTO:
-    // Verifica se TODAS as equipes já possuem pelo menos 5 membros.
     let todosTemMinimo = ordemEquipes.every(g => estado.grupos[g].length >= 5);
-    
-    // Se nem todas têm 5, bloqueia a inserção se a equipe escolhida já tiver alcançado a cota de 5.
     if(!todosTemMinimo && estado.grupos[grupo].length >= 5) {
-        alert(`⚠️ Mantenha o equilíbrio da Terra Média!\n\nOs ${grupo} já possuem membros suficientes no momento.\nPor favor, escolha uma equipe que ainda não atingiu o mínimo de 5 integrantes. Quando todas as equipes tiverem 5 guerreiros, a restrição será removida!`);
+        alert(`⚠️ Mantenha o equilíbrio da Terra Média!\n\nOs ${grupo} já possuem membros suficientes no momento.\nPor favor, escolha uma equipe que ainda não atingiu o mínimo de 5 integrantes.`);
         return;
     }
 
@@ -112,7 +117,6 @@ function confirmar(nome){
     estado.disponiveis = estado.disponiveis.filter(n=>n!==nome);
     salvar();
     
-    // Adiciona o emoji dinâmico acima da confirmação
     document.getElementById("emojiConfirmacao").innerText = pegarEmoji(grupoAtual);
     document.getElementById("confirmacao").innerText = nome + " se uniu aos " + grupoAtual + "!";
     mostrar("tela4");
@@ -154,15 +158,12 @@ function embaralhar(array) {
 }
 
 function iniciarQuiz() {
-    let perguntasSorteadas = embaralhar(bancoPerguntas);
-    estado.perguntasDistribuidas = {
-        "Elfos": perguntasSorteadas.slice(0, 3),
-        "Hobbits": perguntasSorteadas.slice(3, 6),
-        "Anões": perguntasSorteadas.slice(6, 9),
-        "Orcs": perguntasSorteadas.slice(9, 12)
-    };
+    // Agora o jogo tem todas as perguntas em ordem aleatória (15 rodadas)
+    estado.perguntasDoJogo = embaralhar(bancoPerguntas);
     estado.quizIniciado = true;
-    estado.turnoGeral = 0;
+    estado.rodadaAtual = 0;
+    estado.equipeRespondendoIndex = 0;
+    estado.respostasRodada = {};
     estado.pontosQuiz = { Elfos: 0, Hobbits: 0, "Anões": 0, Orcs: 0 };
     
     salvar();
@@ -186,31 +187,33 @@ function prepararTurno() {
     atualizarPlacarLateral();
     limparDestaquesLateral();
     
-    // Cancela qualquer contagem anterior que possa ter ficado presa
     if(timerQuiz) clearInterval(timerQuiz);
     
     document.getElementById("btnConfirmar").classList.add("hidden");
     document.getElementById("btnProxima").classList.add("hidden");
-    document.getElementById("resultadoQuiz").className = "resultado-box hidden";
-    document.getElementById("resultadoQuiz").innerText = "";
+    const resBox = document.getElementById("resultadoQuiz");
+    resBox.className = "resultado-box hidden";
+    resBox.innerText = "";
     alternativaSelecionada = null;
 
-    if (estado.turnoGeral >= 12) {
+    // Se todas as perguntas já foram feitas, vai pro Ranking
+    if (estado.rodadaAtual >= estado.perguntasDoJogo.length) {
         mostrar("ranking");
         return;
     }
 
-    let equipeVez = ordemEquipes[estado.turnoGeral % 4];
-    let idEqCard = "cardTurno" + equipeVez.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    let p = estado.perguntasDoJogo[estado.rodadaAtual];
+    let equipeVez = ordemEquipes[estado.equipeRespondendoIndex];
     
+    // Destaca a equipe que deve responder agora
+    let idEqCard = "cardTurno" + equipeVez.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
     document.getElementById(idEqCard).classList.add("turno-ativo");
-    document.getElementById("avisoTurno").innerText = "Atenção: Turno dos " + equipeVez;
+    
+    document.getElementById("avisoTurno").innerText = `Rodada ${estado.rodadaAtual + 1} - Vez dos ${equipeVez}`;
 
-    let indicePerguntaEquipe = Math.floor(estado.turnoGeral / 4);
-    let p = estado.perguntasDistribuidas[equipeVez][indicePerguntaEquipe];
-
+    // A mágica da imagem automatizada para todas as 15 perguntas
     let indexFoto = bancoPerguntas.findIndex(x => x.titulo === p.titulo) + 1;
-    document.getElementById("fotoPergunta").src = "assets/imagens/foto" + indexFoto + ".jpg";
+    document.getElementById("fotoPergunta").src = "assets/pergunta" + indexFoto + ".png";
     
     document.getElementById("perguntaTitulo").innerText = p.titulo;
     document.getElementById("perguntaTexto").innerText = p.texto;
@@ -219,29 +222,37 @@ function prepararTurno() {
     const contador = document.getElementById("contadorQuiz");
     
     areaAlt.innerHTML = "";
-    areaAlt.classList.add("hidden"); // Esconde as alternativas no início
-    contador.classList.remove("hidden"); // Mostra o contador
-    
-    let tempo = 3;
-    contador.innerText = tempo;
 
-    // Inicia a contagem regressiva
-    timerQuiz = setInterval(() => {
-        tempo--;
-        if(tempo > 0) {
-            contador.innerText = tempo;
-        } else {
-            clearInterval(timerQuiz);
-            contador.classList.add("hidden");
-            areaAlt.classList.remove("hidden"); // Revela as alternativas
-        }
-    }, 1000);
+    // O cronômetro roda apenas na vez da 1ª equipe (Elfos). Para as outras, as alternativas já ficam liberadas.
+    if (estado.equipeRespondendoIndex === 0) {
+        areaAlt.classList.add("hidden"); 
+        contador.classList.remove("hidden"); 
+        
+        // Embaralha as alternativas UMA VEZ por rodada
+        let alternativasComIndex = p.alternativas.map((texto, index) => ({texto: texto, originalIndex: index}));
+        alternativasAtuaisEmbaralhadas = embaralhar(alternativasComIndex);
+        
+        let tempo = 3;
+        contador.innerText = tempo;
 
-    // Constrói os botões invisíveis em segundo plano enquanto a contagem roda
-    let alternativasComIndex = p.alternativas.map((texto, index) => ({texto: texto, originalIndex: index}));
-    let alternativasEmbaralhadas = embaralhar(alternativasComIndex);
+        timerQuiz = setInterval(() => {
+            tempo--;
+            if(tempo > 0) {
+                contador.innerText = tempo;
+            } else {
+                clearInterval(timerQuiz);
+                contador.classList.add("hidden");
+                areaAlt.classList.remove("hidden");
+            }
+        }, 1000);
+    } else {
+        // Se for a 2ª, 3ª ou 4ª equipe a escolher, pula o contador
+        contador.classList.add("hidden");
+        areaAlt.classList.remove("hidden");
+    }
 
-    alternativasEmbaralhadas.forEach((alt) => {
+    // Desenha as alternativas embaralhadas
+    alternativasAtuaisEmbaralhadas.forEach((alt) => {
         const btn = document.createElement("button");
         btn.className = "altBtn";
         btn.innerText = alt.texto;
@@ -250,6 +261,9 @@ function prepararTurno() {
             document.querySelectorAll(".altBtn").forEach(x => x.classList.remove("selecionada"));
             btn.classList.add("selecionada");
             alternativaSelecionada = alt.originalIndex; 
+            
+            // O botão de confirmar diz exatamente o voto de quem você está registrando
+            document.getElementById("btnConfirmar").innerText = `Registrar voto dos ${equipeVez}`;
             document.getElementById("btnConfirmar").classList.remove("hidden");
         };
         
@@ -260,41 +274,90 @@ function prepararTurno() {
 function confirmarResposta() {
     if (alternativaSelecionada === null) return;
     
-    let equipeVez = ordemEquipes[estado.turnoGeral % 4];
-    let indicePerguntaEquipe = Math.floor(estado.turnoGeral / 4);
-    let p = estado.perguntasDistribuidas[equipeVez][indicePerguntaEquipe];
+    let equipeVez = ordemEquipes[estado.equipeRespondendoIndex];
     
-    let idEqCard = "cardTurno" + equipeVez.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-    let cardSide = document.getElementById(idEqCard);
-    let resBox = document.getElementById("resultadoQuiz");
+    // Grava a resposta secreta da equipe
+    estado.respostasRodada[equipeVez] = alternativaSelecionada;
+    
+    // Passa a vez para a próxima equipe
+    estado.equipeRespondendoIndex++;
+    salvar();
 
-    document.querySelectorAll(".altBtn").forEach(btn => btn.disabled = true);
-    document.getElementById("btnConfirmar").classList.add("hidden");
-
-    // Validação correta indepentente da ordem atual dos botões
-    if (alternativaSelecionada === p.correta) {
-        estado.pontosQuiz[equipeVez]++;
-        salvar();
-        atualizarPlacarLateral();
-        
-        cardSide.classList.remove("turno-ativo");
-        cardSide.classList.add("acertou");
-        
-        resBox.innerText = "✨ Glória! Os " + equipeVez + " acertaram!";
-        resBox.className = "resultado-box sucesso";
+    if (estado.equipeRespondendoIndex < 4) {
+        // Ainda faltam equipes escolherem
+        prepararTurno();
     } else {
-        cardSide.classList.remove("turno-ativo");
-        cardSide.classList.add("errou");
-        
-        resBox.innerText = "💀 Sombras... A resposta estava errada.";
-        resBox.className = "resultado-box falha";
+        // Todas as 4 equipes escolheram, hora de revelar!
+        revelarRespostas();
     }
+}
 
-    document.getElementById("btnProxima").classList.remove("hidden");
+function revelarRespostas() {
+    let p = estado.perguntasDoJogo[estado.rodadaAtual];
+    let resBox = document.getElementById("resultadoQuiz");
+    
+    // Oculta a área de alternativas da tela para evitar cortes
+    document.getElementById("alternativas").classList.add("hidden");
+    
+    document.getElementById("btnConfirmar").classList.add("hidden");
+    document.getElementById("avisoTurno").innerText = "A Verdade Revelada!";
+
+    limparDestaquesLateral(); 
+
+    let acertaram = [];
+    let erraram = [];
+
+    // Confere quem acertou e errou
+    ordemEquipes.forEach(eq => {
+        let idEqCard = "cardTurno" + eq.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+        let cardSide = document.getElementById(idEqCard);
+        
+        if (estado.respostasRodada[eq] === p.correta) {
+            estado.pontosQuiz[eq]++;
+            cardSide.classList.add("acertou");
+            acertaram.push(eq);
+        } else {
+            cardSide.classList.add("errou");
+            erraram.push(eq);
+        }
+    });
+
+    salvar();
+    atualizarPlacarLateral();
+    
+    let textoCorreta = p.alternativas[p.correta];
+
+    // Exibe o texto de resultado
+    resBox.classList.remove("hidden");
+    resBox.style.borderColor = ""; 
+
+    if (acertaram.length === 4) {
+        resBox.className = "resultado-box sucesso";
+        resBox.innerHTML = `🌟 Perfeito! A resposta era <br><b>"${textoCorreta}"</b><br> Todas as alianças acertaram!`;
+    } else if (acertaram.length === 0) {
+        resBox.className = "resultado-box falha";
+        resBox.innerHTML = `💀 Sombras... A resposta era <br><b>"${textoCorreta}"</b><br> Ninguém acertou!`;
+    } else {
+        resBox.className = "resultado-box";
+        resBox.style.borderColor = "var(--gold)";
+        resBox.innerHTML = `A resposta correta era <br><span style="color:var(--gold-glow); font-size:32px;">"${textoCorreta}"</span><br><br>✨ <b>Acertaram:</b> ${acertaram.join(", ")}<br>❌ <b>Erraram:</b> ${erraram.join(", ")}`;
+    }
+
+    let btnProxima = document.getElementById("btnProxima");
+    btnProxima.classList.remove("hidden");
+    
+    // Se for a última pergunta, muda o texto do botão para finalizar
+    if (estado.rodadaAtual === estado.perguntasDoJogo.length - 1) {
+        btnProxima.innerText = "Ir para a Coroação Final";
+    } else {
+        btnProxima.innerText = "Avançar para a Próxima Pergunta";
+    }
 }
 
 function proximaPergunta() {
-    estado.turnoGeral++;
+    estado.rodadaAtual++;
+    estado.equipeRespondendoIndex = 0;
+    estado.respostasRodada = {};
     salvar();
     prepararTurno();
 }
@@ -338,10 +401,8 @@ function loopAnimacaoVicente() {
     const mascote = document.getElementById("vicenteMascote");
     if(!mascote) return;
 
-    // Limpa classes de animação anteriores
     mascote.classList.remove("animacao-espiada", "animacao-pulos");
 
-    // Lugares estratégicos: Canto Esquerdo, Centro-Esquerdo, Centro-Direito, Canto Direito
     const posicoes = [
         { left: "5%", right: "auto" },
         { left: "30%", right: "auto" },
@@ -349,32 +410,23 @@ function loopAnimacaoVicente() {
         { left: "auto", right: "5%" }
     ];
 
-    // Sorteia uma das posições e aplica no CSS inline
     const posEscolhida = posicoes[Math.floor(Math.random() * posicoes.length)];
     mascote.style.left = posEscolhida.left;
     mascote.style.right = posEscolhida.right;
 
-    // Sorteia um tempo de espera entre 15 e 40 segundos
     const tempoEspera = Math.floor(Math.random() * (40000 - 15000 + 1)) + 15000;
 
     setTimeout(() => {
-        // Sorteia a animação (50% de chance para cada)
         const classeAnimacao = Math.random() > 0.5 ? "animacao-espiada" : "animacao-pulos";
-        
-        // Força um reflow para o navegador entender que a animação deve recomeçar
         void mascote.offsetWidth; 
         mascote.classList.add(classeAnimacao);
-
-        // A animação mais longa dura 4 segundos. Após 5 segundos, repete o ciclo.
         setTimeout(loopAnimacaoVicente, 5000);
-
     }, tempoEspera);
 }
 
 document.addEventListener("DOMContentLoaded", () => {
     mostrar("tela1");
     
-    // Inicia o loop do mascote animado
     loopAnimacaoVicente();
 
     if(document.getElementById("btnIniciar")) {

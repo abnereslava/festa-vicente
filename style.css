@@ -69,7 +69,6 @@ h1, h2, h3, h4, .cinzel { font-family: 'Cinzel', serif; }
 .board { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
 .names { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
 
-/* Afastamento maior das divs na tela de Coroação */
 #boardRanking { gap: 40px; margin-bottom: 20px; }
 
 .card, .group {
@@ -119,12 +118,28 @@ h1, h2, h3, h4, .cinzel { font-family: 'Cinzel', serif; }
 .pergaminho li { padding: 5px 0; border-bottom: 1px dashed rgba(212,175,55,0.2); }
 .topbar { position: fixed; top: 15px; right: 15px; z-index: 999; }
 
-#quiz { flex-direction: row; align-items: stretch; padding: 0; }
+/* =========================================
+   TELA DO QUIZ (TRAVADA NO 100VH)
+========================================= */
+#quiz { 
+  flex-direction: row; 
+  align-items: stretch; 
+  padding: 0; 
+  height: 100vh; /* Trava na altura total da tela */
+  overflow: hidden; /* Proíbe qualquer barra de rolagem geral */
+}
 #quiz:not(.hidden) { display: flex; }
 
 .quiz-sidebar {
-  width: 300px; background: var(--panel-bg); border-right: 2px solid var(--gold);
-  padding: 30px 20px; display: flex; flex-direction: column; gap: 15px; box-shadow: 5px 0 20px rgba(0,0,0,0.8);
+  width: 300px; 
+  background: var(--panel-bg); 
+  border-right: 2px solid var(--gold);
+  padding: 30px 20px; 
+  display: flex; 
+  flex-direction: column; 
+  gap: 15px; 
+  box-shadow: 5px 0 20px rgba(0,0,0,0.8);
+  overflow-y: auto; /* Permite rolar APENAS a sidebar, se sobrar pontuação */
 }
 .side-title { color: var(--gold); text-transform: uppercase; font-size: 20px; margin-bottom: 10px; border-bottom: 1px solid var(--gold); padding-bottom: 10px; }
 
@@ -137,47 +152,75 @@ h1, h2, h3, h4, .cinzel { font-family: 'Cinzel', serif; }
 .acertou { border-color: var(--correct); box-shadow: 0 0 25px var(--correct); background: rgba(76, 175, 80, 0.2); }
 .errou { border-color: var(--wrong); box-shadow: 0 0 25px var(--wrong); background: rgba(229, 57, 53, 0.2); opacity: 0.6; }
 
-.quiz-main { flex: 1; padding: 40px; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; }
-.cabecalho-turno { margin-bottom: 30px; text-transform: uppercase; letter-spacing: 2px; }
+/* ÁREA DE PERGUNTAS E RESPOSTAS */
+.quiz-main { 
+  flex: 1; 
+  height: 100vh;
+  /* Aumentamos o padding do topo para 10vh para compensar visualmente a centralização */
+  padding: 10vh 40px 15px 40px; 
+  display: flex; 
+  flex-direction: column; 
+  align-items: center; 
+  /* A mágica está aqui: muda de 'center' para 'flex-start' */
+  justify-content: flex-start; 
+  position: relative; 
+  overflow: hidden;
+}
 
-.moldura-epica { width: 320px; height: 320px; object-fit: cover; border-radius: 8px; border: 4px solid var(--gold); box-shadow: 0 0 30px rgba(0,0,0,0.8), inset 0 0 20px rgba(0,0,0,0.5); margin-bottom: 25px; }
-.titulo-pergunta { font-size: 32px; color: var(--gold); margin-bottom: 10px; }
-.texto-pergunta { font-size: 24px; max-width: 800px; margin-bottom: 30px; }
+/* Espaçamentos usando vh (viewport height) diminuem sozinhos em monitores curtos */
+.cabecalho-turno { margin-bottom: 2vh; text-transform: uppercase; letter-spacing: 2px; }
 
-.alternativas { display: flex; flex-direction: column; gap: 15px; width: 100%; max-width: 600px; margin-bottom: 30px; }
-.altBtn { background: var(--panel-bg); border: 1px solid var(--gold); color: white; padding: 18px; font-size: 20px; border-radius: 8px; cursor: pointer; transition: all 0.2s; font-family: 'Lora', serif; }
+.moldura-epica { 
+  height: 28vh; /* A foto pega no máximo 28% da altura da tela */
+  max-height: 320px; /* Mas nunca passa de 320px em telas enormes */
+  width: auto; 
+  aspect-ratio: 1/1; /* Mantém quadrada */
+  object-fit: cover; 
+  border-radius: 8px; 
+  border: 4px solid var(--gold); 
+  box-shadow: 0 0 30px rgba(0,0,0,0.8), inset 0 0 20px rgba(0,0,0,0.5); 
+  margin-bottom: 2vh; 
+}
+
+/* A fonte diminui sozinha através do clamp (mínimo, ideal, máximo) */
+.titulo-pergunta { font-size: clamp(20px, 3.5vh, 32px); color: var(--gold); margin-bottom: 1vh; }
+.texto-pergunta { font-size: clamp(16px, 2.5vh, 24px); max-width: 800px; margin-bottom: 2.5vh; }
+
+.alternativas { display: flex; flex-direction: column; gap: 1.5vh; width: 100%; max-width: 600px; margin-bottom: 2vh; }
+
+.altBtn { 
+  background: var(--panel-bg); 
+  border: 1px solid var(--gold); 
+  color: white; 
+  padding: 1.5vh 20px; /* Espaçamento interno do botão é dinâmico */
+  font-size: clamp(16px, 2.5vh, 20px); 
+  border-radius: 8px; 
+  cursor: pointer; 
+  transition: all 0.2s; 
+  font-family: 'Lora', serif; 
+}
 .altBtn:hover { background: rgba(212, 175, 55, 0.2); }
 .altBtn.selecionada { background: var(--gold); color: var(--bg-color); font-weight: bold; transform: scale(1.02); box-shadow: 0 0 15px var(--gold); }
 
-.resultado-box { margin-top: 20px; padding: 20px 40px; border-radius: 8px; font-size: 26px; font-family: 'Cinzel', serif; font-weight: bold; animation: fadeIn 0.5s ease; }
+.resultado-box { margin-top: 1.5vh; padding: 1.5vh 40px; border-radius: 8px; font-size: clamp(18px, 3vh, 26px); font-family: 'Cinzel', serif; font-weight: bold; animation: fadeIn 0.5s ease; }
 .resultado-box.sucesso { background: rgba(76, 175, 80, 0.2); border: 2px solid var(--correct); color: var(--correct); }
 .resultado-box.falha { background: rgba(229, 57, 53, 0.2); border: 2px solid var(--wrong); color: var(--wrong); }
 
 @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-@media(max-width: 900px) {
-  #quiz:not(.hidden) { flex-direction: column; }
-  .quiz-sidebar { width: 100%; flex-direction: row; flex-wrap: wrap; justify-content: center; padding: 15px; }
-  .card-equipe { padding: 10px; gap: 10px; }
-  .moldura-epica { width: 250px; height: 250px; }
-}
 
 /* =========================================
    ANIMAÇÕES DO MASCOTE (VICENTE HOBBIT)
 ========================================= */
 #vicenteMascote {
   position: fixed;
-  bottom: -300px; /* Escondido fora da tela */
+  bottom: -300px; 
   width: 180px; 
   z-index: 1000;
-  pointer-events: none; /* Garante que ninguém clique nele sem querer */
+  pointer-events: none; 
   filter: drop-shadow(0px 0px 15px rgba(0,0,0,0.8));
 }
 
-/* Animação 1: Dando uma espiada */
-.animacao-espiada {
-  animation: espiar 4s cubic-bezier(0.25, 1, 0.5, 1);
-}
+.animacao-espiada { animation: espiar 4s cubic-bezier(0.25, 1, 0.5, 1); }
 
 @keyframes espiar {
   0%   { bottom: -300px; transform: rotate(0deg); }
@@ -188,10 +231,7 @@ h1, h2, h3, h4, .cinzel { font-family: 'Cinzel', serif; }
   100% { bottom: -300px; transform: rotate(0deg); }
 }
 
-/* Animação 2: Pulinhos animados */
-.animacao-pulos {
-  animation: pular 3s ease-in-out;
-}
+.animacao-pulos { animation: pular 3s ease-in-out; }
 
 @keyframes pular {
   0%   { bottom: -300px; transform: translateY(0); }
@@ -207,12 +247,12 @@ h1, h2, h3, h4, .cinzel { font-family: 'Cinzel', serif; }
    CONTADOR DO QUIZ
 ========================================= */
 .contador-epico {
-  font-size: 90px;
+  font-size: clamp(60px, 10vh, 90px);
   color: var(--gold-glow);
   font-family: 'Cinzel', serif;
   font-weight: bold;
   text-shadow: 0 0 25px var(--gold), 0 0 10px #000;
-  margin: 10px 0 30px 0;
+  margin: 2vh 0;
   animation: pulseContador 1s infinite;
 }
 
@@ -221,3 +261,5 @@ h1, h2, h3, h4, .cinzel { font-family: 'Cinzel', serif; }
   50% { transform: scale(1.2); opacity: 0.8; }
   100% { transform: scale(1); opacity: 1; }
 }
+
+/* Removi o media query de mobile, já que será executado estritamente em desktop! */
