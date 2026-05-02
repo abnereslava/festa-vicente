@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jornada de Vicente</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="topbar">
+<button class="btn btn-small" onclick="resetar()">Resetar Progresso</button>
+<button class="btn btn-small" onclick="irTelao()">Telão das Alianças</button>
+</div>
+
+<section id="tela1" class="screen tela-vicente">
+<div class="overlay"></div>
+<div class="conteudo">
+<h1 class="titulo-epico">🌿 Jornada do Vicente 🌿</h1>
+<p class="subtitulo">Bem-vindos à Terra Média.<br>Hoje celebramos o primeiro ano do pequeno hobbit Vicente.</p>
+<button id="btnIniciar" class="btn btn-glow">Iniciar a Sociedade</button>
+</div>
+</section>
+
+<section id="tela2" class="screen hidden">
+<h2 class="titulo-epico">Escolha seu Povo</h2>
+<div class="cards">
+<div class="card" data-grupo="Elfos"><div class="emoji">🧝</div><h3>Elfos</h3></div>
+<div class="card" data-grupo="Hobbits"><div class="emoji">🍃</div><h3>Hobbits</h3></div>
+<div class="card" data-grupo="Anões"><div class="emoji">⛏️</div><h3>Anões</h3></div>
+<div class="card" data-grupo="Orcs"><div class="emoji">🧌</div><h3>Orcs</h3></div>
+</div>
+</section>
+
+<section id="tela3" class="screen hidden">
+<h2 id="grupoEscolhidoTitulo" class="titulo-epico"></h2>
+<p class="subtitulo">Quem se junta a esta aliança?</p>
+<input type="text" id="buscaNome" class="input-busca" placeholder="🔍 Buscar convidado..." onkeyup="renderNomes()">
+<div id="listaNomes" class="names"></div>
+<br>
+<button class="btn" onclick="mostrar('tela2')">Voltar aos Povos</button>
+</section>
+
+<section id="tela4" class="screen hidden">
+<div id="emojiConfirmacao" class="emoji" style="font-size: 80px; margin-bottom: 20px;"></div>
+<h2 id="confirmacao" class="titulo-epico highlight-gold"></h2>
+<p class="subtitulo">Uma nova aliança foi selada nos salões antigos!</p>
+<button class="btn btn-glow" onclick="mostrar('tela2')">Convocar Próximo</button>
+<button class="btn" onclick="irTelao()">Ver o Mapa (Telão)</button>
+</section>
+
+<section id="telao" class="screen hidden">
+<h1 class="titulo-epico">⚔️ Sociedades da Terra Média ⚔️</h1>
+<div class="board">
+<div class="group pergaminho"><h3>🧝 Elfos</h3><ul id="listaElfos"></ul></div>
+<div class="group pergaminho"><h3>🍃 Hobbits</h3><ul id="listaHobbits"></ul></div>
+<div class="group pergaminho"><h3>⛏️ Anões</h3><ul id="listaAnoes"></ul></div>
+<div class="group pergaminho"><h3>🧌 Orcs</h3><ul id="listaOrcs"></ul></div>
+</div>
+<br>
+<button class="btn btn-glow" onclick="iniciarQuiz()">Iniciar o Quiz Épico</button>
+<button class="btn" onclick="mostrar('tela2')">Continuar Convocação</button>
+</section>
+
+<section id="quiz" class="screen hidden">
+<div class="quiz-sidebar">
+<h3 class="side-title">Rodada Atual</h3>
+<div id="cardTurnoElfos" class="card-equipe">
+<div class="emoji">🧝</div><div class="info"><h4>Elfos</h4><span id="scoreElfos">0 pts</span></div>
+</div>
+<div id="cardTurnoHobbits" class="card-equipe">
+<div class="emoji">🍃</div><div class="info"><h4>Hobbits</h4><span id="scoreHobbits">0 pts</span></div>
+</div>
+<div id="cardTurnoAnoes" class="card-equipe">
+<div class="emoji">⛏️</div><div class="info"><h4>Anões</h4><span id="scoreAnoes">0 pts</span></div>
+</div>
+<div id="cardTurnoOrcs" class="card-equipe">
+<div class="emoji">🧌</div><div class="info"><h4>Orcs</h4><span id="scoreOrcs">0 pts</span></div>
+</div>
+</div>
+
+<div class="quiz-main">
+<div class="cabecalho-turno">
+<h2 id="avisoTurno" class="highlight-gold"></h2>
+</div>
+
+<img id="fotoPergunta" class="fotoQuiz moldura-epica" src="" alt="Vicente">
+<h2 id="perguntaTitulo" class="titulo-pergunta"></h2>
+<p id="perguntaTexto" class="texto-pergunta"></p>
+
+<div id="contadorQuiz" class="contador-epico hidden"></div>
+
+<div id="alternativas" class="alternativas"></div>
+
+<div class="quiz-actions">
+<button id="btnConfirmar" class="btn btn-glow hidden" onclick="confirmarResposta()">Selar Resposta</button>
+<button id="btnProxima" class="btn hidden" onclick="proximaPergunta()">Próximo Turno</button>
+</div>
+
+<div id="resultadoQuiz" class="resultado-box hidden"></div>
+</div>
+</section>
+
+<section id="ranking" class="screen hidden">
+<h1 class="titulo-epico destaque-final">🏆 A Grande Coroação 🏆</h1>
+<p class="subtitulo">A jornada chega ao fim. Eis a pontuação das sociedades:</p>
+<div class="board" id="boardRanking">
+</div>
+<br>
+<button class="btn btn-glow" onclick="irTelao()">Retornar ao Salão</button>
+</section>
+
+<img id="vicenteMascote" src="vicentehobbit.png" alt="O Pequeno Hobbit">
+
+<script src="script.js"></script>
+</body>
+</html>

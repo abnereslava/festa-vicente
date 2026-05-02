@@ -1,0 +1,223 @@
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Lora:ital,wght@0,400;0,700;1,400&display=swap');
+
+:root {
+  --bg-color: #0b140b;
+  --panel-bg: rgba(20, 36, 20, 0.85);
+  --gold: #d4af37;
+  --gold-glow: #f9d77e;
+  --text-main: #e8e6d9;
+  --correct: #4CAF50;
+  --wrong: #e53935;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Lora', Georgia, serif;
+  background: var(--bg-color);
+  background-image: radial-gradient(circle at center, #1a2f1a 0%, #050a05 100%);
+  color: var(--text-main);
+  overflow-x: hidden;
+}
+
+h1, h2, h3, h4, .cinzel { font-family: 'Cinzel', serif; }
+.hidden { display: none !important; }
+
+.screen {
+  min-height: 100vh;
+  padding: 40px 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+
+.tela-vicente {
+  position: relative;
+  background: url("vicente.jpg") center center/cover no-repeat;
+}
+
+.overlay {
+  position: absolute; inset: 0;
+  background: rgba(11, 20, 11, 0.70);
+  z-index: 1;
+}
+
+.conteudo { position: relative; z-index: 2; max-width: 900px; }
+
+.titulo-epico {
+  font-size: 52px; color: var(--gold);
+  text-shadow: 2px 2px 4px #000;
+  margin-bottom: 15px; letter-spacing: 2px;
+}
+.subtitulo { font-size: 22px; margin-bottom: 30px; line-height: 1.6; color: #ccc; }
+.highlight-gold { color: var(--gold-glow); font-weight: bold; }
+
+.btn {
+  padding: 15px 30px; border: 2px solid var(--gold); border-radius: 8px;
+  cursor: pointer; font-size: 18px; font-family: 'Cinzel', serif; font-weight: bold;
+  background: rgba(0, 0, 0, 0.6); color: var(--gold); margin: 8px;
+  transition: all 0.3s ease; text-transform: uppercase; letter-spacing: 1px;
+}
+.btn:hover { background: var(--gold); color: var(--bg-color); box-shadow: 0 0 15px var(--gold); transform: translateY(-2px); }
+.btn-small { padding: 8px 16px; font-size: 14px; border-width: 1px; }
+.btn-glow { box-shadow: 0 0 10px rgba(212, 175, 55, 0.4); }
+
+.cards, .board, .names { display: grid; gap: 20px; width: 100%; max-width: 1000px; }
+.cards { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+.board { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+.names { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+
+/* Afastamento maior das divs na tela de Coroação */
+#boardRanking { gap: 40px; margin-bottom: 20px; }
+
+.card, .group {
+  background: var(--panel-bg); border: 1px solid rgba(212, 175, 55, 0.3);
+  padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+  transition: all 0.3s;
+}
+.card { cursor: pointer; }
+.card:hover { border-color: var(--gold); transform: translateY(-5px); }
+.emoji { font-size: 48px; margin-bottom: 10px; }
+
+.vencedor {
+  transform: scale(1.08);
+  border: 2px solid var(--gold-glow) !important;
+  box-shadow: 0 0 30px rgba(249, 215, 126, 0.6), inset 0 0 15px rgba(249, 215, 126, 0.2);
+  background: rgba(212, 175, 55, 0.15) !important;
+  z-index: 10;
+}
+.vencedor h3 { color: var(--gold-glow); font-size: 32px; }
+
+.input-busca {
+  width: 100%; max-width: 400px; padding: 12px; margin-bottom: 20px;
+  border-radius: 8px; border: 1px solid var(--gold);
+  background: rgba(0,0,0,0.5); color: white; font-family: 'Lora', serif;
+  font-size: 18px; outline: none; transition: all 0.3s;
+}
+.input-busca:focus { box-shadow: 0 0 10px rgba(212, 175, 55, 0.5); }
+.input-busca::placeholder { color: #aaa; }
+
+.nome-container { display: flex; gap: 5px; align-items: stretch; }
+.nameBtn {
+  flex: 1; cursor: pointer; font-size: 18px; padding: 12px;
+  font-family: 'Lora', serif; background: rgba(255, 255, 255, 0.08);
+  color: var(--gold-glow); border: 1px solid rgba(212, 175, 55, 0.4);
+  border-radius: 8px; transition: all 0.2s; text-align: left;
+}
+.nameBtn:hover { background: var(--gold); color: var(--bg-color); }
+
+.removeBtn {
+  background: rgba(229, 57, 53, 0.1); border: 1px solid var(--wrong);
+  color: var(--wrong); border-radius: 8px; cursor: pointer;
+  padding: 0 12px; font-size: 16px; transition: all 0.2s; display: flex; align-items: center; justify-content: center;
+}
+.removeBtn:hover { background: var(--wrong); color: white; }
+
+.pergaminho ul { list-style: none; text-align: left; font-size: 18px; padding-top: 15px; }
+.pergaminho li { padding: 5px 0; border-bottom: 1px dashed rgba(212,175,55,0.2); }
+.topbar { position: fixed; top: 15px; right: 15px; z-index: 999; }
+
+#quiz { flex-direction: row; align-items: stretch; padding: 0; }
+#quiz:not(.hidden) { display: flex; }
+
+.quiz-sidebar {
+  width: 300px; background: var(--panel-bg); border-right: 2px solid var(--gold);
+  padding: 30px 20px; display: flex; flex-direction: column; gap: 15px; box-shadow: 5px 0 20px rgba(0,0,0,0.8);
+}
+.side-title { color: var(--gold); text-transform: uppercase; font-size: 20px; margin-bottom: 10px; border-bottom: 1px solid var(--gold); padding-bottom: 10px; }
+
+.card-equipe { display: flex; align-items: center; gap: 15px; padding: 15px; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; transition: all 0.4s ease; }
+.card-equipe .emoji { font-size: 32px; margin: 0; }
+.card-equipe .info h4 { font-size: 18px; margin-bottom: 5px; }
+.card-equipe .info span { font-size: 16px; color: var(--gold); font-weight: bold; }
+
+.turno-ativo { border: 2px solid var(--gold); background: rgba(212, 175, 55, 0.15); box-shadow: 0 0 20px var(--gold-glow); transform: scale(1.05); }
+.acertou { border-color: var(--correct); box-shadow: 0 0 25px var(--correct); background: rgba(76, 175, 80, 0.2); }
+.errou { border-color: var(--wrong); box-shadow: 0 0 25px var(--wrong); background: rgba(229, 57, 53, 0.2); opacity: 0.6; }
+
+.quiz-main { flex: 1; padding: 40px; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; }
+.cabecalho-turno { margin-bottom: 30px; text-transform: uppercase; letter-spacing: 2px; }
+
+.moldura-epica { width: 320px; height: 320px; object-fit: cover; border-radius: 8px; border: 4px solid var(--gold); box-shadow: 0 0 30px rgba(0,0,0,0.8), inset 0 0 20px rgba(0,0,0,0.5); margin-bottom: 25px; }
+.titulo-pergunta { font-size: 32px; color: var(--gold); margin-bottom: 10px; }
+.texto-pergunta { font-size: 24px; max-width: 800px; margin-bottom: 30px; }
+
+.alternativas { display: flex; flex-direction: column; gap: 15px; width: 100%; max-width: 600px; margin-bottom: 30px; }
+.altBtn { background: var(--panel-bg); border: 1px solid var(--gold); color: white; padding: 18px; font-size: 20px; border-radius: 8px; cursor: pointer; transition: all 0.2s; font-family: 'Lora', serif; }
+.altBtn:hover { background: rgba(212, 175, 55, 0.2); }
+.altBtn.selecionada { background: var(--gold); color: var(--bg-color); font-weight: bold; transform: scale(1.02); box-shadow: 0 0 15px var(--gold); }
+
+.resultado-box { margin-top: 20px; padding: 20px 40px; border-radius: 8px; font-size: 26px; font-family: 'Cinzel', serif; font-weight: bold; animation: fadeIn 0.5s ease; }
+.resultado-box.sucesso { background: rgba(76, 175, 80, 0.2); border: 2px solid var(--correct); color: var(--correct); }
+.resultado-box.falha { background: rgba(229, 57, 53, 0.2); border: 2px solid var(--wrong); color: var(--wrong); }
+
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+@media(max-width: 900px) {
+  #quiz:not(.hidden) { flex-direction: column; }
+  .quiz-sidebar { width: 100%; flex-direction: row; flex-wrap: wrap; justify-content: center; padding: 15px; }
+  .card-equipe { padding: 10px; gap: 10px; }
+  .moldura-epica { width: 250px; height: 250px; }
+}
+
+/* =========================================
+   ANIMAÇÕES DO MASCOTE (VICENTE HOBBIT)
+========================================= */
+#vicenteMascote {
+  position: fixed;
+  bottom: -300px; /* Escondido fora da tela */
+  width: 180px; 
+  z-index: 1000;
+  pointer-events: none; /* Garante que ninguém clique nele sem querer */
+  filter: drop-shadow(0px 0px 15px rgba(0,0,0,0.8));
+}
+
+/* Animação 1: Dando uma espiada */
+.animacao-espiada {
+  animation: espiar 4s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+@keyframes espiar {
+  0%   { bottom: -300px; transform: rotate(0deg); }
+  15%  { bottom: -20px; transform: rotate(-12deg); }
+  25%  { bottom: -20px; transform: rotate(5deg); }
+  35%  { bottom: -20px; transform: rotate(-5deg); }
+  85%  { bottom: -20px; transform: rotate(0deg); }
+  100% { bottom: -300px; transform: rotate(0deg); }
+}
+
+/* Animação 2: Pulinhos animados */
+.animacao-pulos {
+  animation: pular 3s ease-in-out;
+}
+
+@keyframes pular {
+  0%   { bottom: -300px; transform: translateY(0); }
+  15%  { bottom: -10px; transform: translateY(0); }
+  30%  { bottom: -10px; transform: translateY(-80px) scale(1.05); }
+  45%  { bottom: -10px; transform: translateY(0) scale(0.95); }
+  60%  { bottom: -10px; transform: translateY(-60px) scale(1.05); }
+  75%  { bottom: -10px; transform: translateY(0) scale(1); }
+  100% { bottom: -300px; transform: translateY(0); }
+}
+
+/* =========================================
+   CONTADOR DO QUIZ
+========================================= */
+.contador-epico {
+  font-size: 90px;
+  color: var(--gold-glow);
+  font-family: 'Cinzel', serif;
+  font-weight: bold;
+  text-shadow: 0 0 25px var(--gold), 0 0 10px #000;
+  margin: 10px 0 30px 0;
+  animation: pulseContador 1s infinite;
+}
+
+@keyframes pulseContador {
+  0% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.2); opacity: 0.8; }
+  100% { transform: scale(1); opacity: 1; }
+}
